@@ -11,7 +11,7 @@ BATCH_SIZE = 200
 MOMENTUM = 0.9
 EPOCHS = 20
 
-AI = nn.NeuralNetwork((utils.INPUT_SIZE, 100, 32, 10))
+AI = nn.NeuralNetwork((utils.INPUT_SIZE, 128, 64, 10))
 AI.randomize()
 
 # 'one-hot encoding' encodes labels to a table of expected outputs. Use np.eye

@@ -12,11 +12,11 @@ test_images_filepath = join(input_path, 't10k-images.idx3-ubyte')
 test_labels_filepath = join(input_path, 't10k-labels.idx1-ubyte')
 
 NOISE_STRENGTH = 0.3
-NOISE_PROBABILITY = 0.3
-SHIFT_STRENGTH = 7
-SCALE_DOWN_STRENGTH = 0.5
-SCALE_UP_STRENGTH = 0.2
-ROTATION_STRENGTH = 30
+NOISE_PROBABILITY = 0.2
+SHIFT_STRENGTH = 5
+SCALE_DOWN_STRENGTH = 0.4
+SCALE_UP_STRENGTH = 0.1
+ROTATION_STRENGTH = 10
 
 IMG_WIDTH = 28
 IMG_HEIGHT = 28
