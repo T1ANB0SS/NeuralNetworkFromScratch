@@ -1,7 +1,7 @@
 import pygame
 import pygame.freetype
 import numpy as np
-#import trainer
+import trainer
 
 pygame.init()
 pygame.freetype.init()
@@ -123,8 +123,8 @@ def draw_panel():
         "FIVE",        "SIX",        "SEVEN",        "EIGHT",        "NINE"
     ]
 
-    #outputs = trainer.AI.calculate_outputs(grid.ravel())
-    outputs = np.array((0, 0, .1, .2, 0, 1, 0, 0, 0, 0), dtype=np.float32)
+    outputs = trainer.AI.calculate_outputs(grid.ravel())
+    # outputs = np.array((0, 0, .1, .2, 0, 1, 0, 0, 0, 0), dtype=np.float32)
     outputs /= np.sum(outputs, dtype=np.float32)
 
     indices = outputs.argsort()
