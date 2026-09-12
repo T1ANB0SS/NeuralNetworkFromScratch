@@ -1,7 +1,7 @@
 import pygame
 import pygame.freetype
 import numpy as np
-import trainer
+#import trainer
 
 pygame.init()
 pygame.freetype.init()
@@ -113,15 +113,18 @@ def draw_panel():
     panel.fill(PANEL_COLOR)
     title_font.render_to(panel, (30, 40), "AI Handwriting", WHITE)
     title_font.render_to(panel, (30, 70), "Recognition", WHITE)
-    small_font.render_to(panel, (30, 110), "LMB : Draw | RMB : Erase | C : Clear", LGRAY)
+    small_font.render_to(panel, (30, 110), "[LMB] : Draw", LGRAY)
+    small_font.render_to(panel, (128, 110), "[RMB] : Erase", LGRAY)
+    small_font.render_to(panel, (30, 130), "[C] : Clear", LGRAY)
+    small_font.render_to(panel, (128, 130), "[Scroll] : Brush Size", LGRAY)
 
     labels = [
         "ZERO",        "ONE",        "TWO",        "THREE",        "FOUR",
         "FIVE",        "SIX",        "SEVEN",        "EIGHT",        "NINE"
     ]
 
-    outputs = trainer.AI.calculate_outputs(grid.ravel())
-    #outputs = np.array((0, 0, .1, .2, 0, 1, 0, 0, 0, 0), dtype=np.float32)
+    #outputs = trainer.AI.calculate_outputs(grid.ravel())
+    outputs = np.array((0, 0, .1, .2, 0, 1, 0, 0, 0, 0), dtype=np.float32)
     outputs /= np.sum(outputs, dtype=np.float32)
 
     indices = outputs.argsort()
@@ -130,8 +133,8 @@ def draw_panel():
 
     for i in range(10):
         index = indices[9-i]
-        font.render_to(panel, (40, 160+40*i), labels[index], LGRAY if i > 0 else WHITE)
-        font.render_to(panel, (160, 160+40*i), f"{outputs[index]*100:.2f}%", LGRAY if i > 0 else WHITE)
+        font.render_to(panel, (40, 180+36*i), labels[index], LGRAY if i > 0 else WHITE)
+        font.render_to(panel, (160, 180+36*i), f"{outputs[index]*100:.2f}%", LGRAY if i > 0 else WHITE)
 
     screen.blit(panel, (GRID_WIDTH, 0))
 
