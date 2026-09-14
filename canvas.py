@@ -6,6 +6,8 @@ import trainer
 pygame.init()
 pygame.freetype.init()
 
+SKIP_TRAINING = False
+
 GRID_SIZE = 28
 CELL_SIZE = 20
 
@@ -23,6 +25,11 @@ GRID_COLOR = (60, 60, 60)
 WHITE = (255, 255, 255)
 LGRAY = (200, 200, 200)
 BLACK = (0, 0, 0)
+
+
+if not SKIP_TRAINING:
+    trainer.init()
+
 
 # Fonts
 font = pygame.freetype.SysFont("Sans Serif", 16)
@@ -129,8 +136,6 @@ def draw_panel():
 
     indices = outputs.argsort()
 
-    print(outputs.argmax())
-
     for i in range(10):
         index = indices[9-i]
         font.render_to(panel, (40, 180+36*i), labels[index], LGRAY if i > 0 else WHITE)
@@ -144,50 +149,52 @@ erasing = False
 
 running = True
 
-while running:
+if __name__ == "__main__":
 
-    mouse_x, mouse_y = pygame.mouse.get_pos()
+    while running:
 
-    for event in pygame.event.get():
+        mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        if event.type == pygame.QUIT:
-            running = False
+        for event in pygame.event.get():
 
-        elif event.type == pygame.KEYDOWN:
+            if event.type == pygame.QUIT:
+                running = False
 
-            if event.key == pygame.K_c:
-                clear_grid()
+            elif event.type == pygame.KEYDOWN:
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.key == pygame.K_c:
+                    clear_grid()
 
-            if event.button == 1:
-                drawing = True
+            elif event.type == pygame.MOUSEBUTTONDOWN:
 
-            elif event.button == 3:
-                erasing = True
+                if event.button == 1:
+                    drawing = True
 
-        elif event.type == pygame.MOUSEBUTTONUP:
+                elif event.button == 3:
+                    erasing = True
 
-            if event.button == 1:
-                drawing = False
+            elif event.type == pygame.MOUSEBUTTONUP:
 
-            elif event.button == 3:
-                erasing = False
+                if event.button == 1:
+                    drawing = False
 
-        elif event.type == pygame.MOUSEWHEEL:
-            brush_size = min(max(1, brush_size + event.y), GRID_SIZE)
+                elif event.button == 3:
+                    erasing = False
 
-    if drawing or erasing:
-        draw_at_mouse(mouse_x, mouse_y, erasing)
+            elif event.type == pygame.MOUSEWHEEL:
+                brush_size = min(max(1, brush_size + event.y), GRID_SIZE)
 
-    draw_grid()
+        if drawing or erasing:
+            draw_at_mouse(mouse_x, mouse_y, erasing)
 
-    if pygame.mouse.get_focused():
-        draw_indicator()
+        draw_grid()
 
-    draw_panel()
+        if pygame.mouse.get_focused():
+            draw_indicator()
 
-    pygame.display.flip()
-    clock.tick(120)
+        draw_panel()
 
-pygame.quit()
+        pygame.display.flip()
+        clock.tick(120)
+
+    pygame.quit()

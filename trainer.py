@@ -11,88 +11,91 @@ BATCH_SIZE = 200
 MOMENTUM = 0.9
 EPOCHS = 20
 
-AI = nn.NeuralNetwork((utils.INPUT_SIZE, 128, 64, 10))
+AI = nn.NeuralNetwork((utils.INPUT_SIZE, 128, 32, 10))
 AI.randomize()
 
-# 'one-hot encoding' encodes labels to a table of expected outputs. Use np.eye
-x_train = utils.x_train.reshape(utils.x_train.shape[0], -1)
-y_train = np.eye(10, dtype=np.float32)[utils.y_train]
+def init():
 
-x_train_aug = utils.x_train_aug.reshape(utils.x_train_aug.shape[0], -1)
-y_train_aug = np.eye(10, dtype=np.float32)[utils.y_train_aug]
+    utils.init()
 
-x_test = utils.x_test.reshape(utils.x_test.shape[0], -1)
-y_test = np.eye(10, dtype=np.float32)[utils.y_test]
+    # 'one-hot encoding' encodes labels to a table of expected outputs. Use np.eye
+    x_train = utils.x_train.reshape(utils.x_train.shape[0], -1)
+    x_test = utils.x_test.reshape(utils.x_test.shape[0], -1)
 
-### SHOW EXAMPLES ###
-utils.show_examples()
+    x_train_aug = utils.x_train_aug.reshape(utils.x_train_aug.shape[0], -1)
+    y_train_aug = np.eye(10, dtype=np.float32)[utils.y_train_aug]
+
+    ### SHOW EXAMPLES ###
+    utils.show_examples(True, False, 9)
+
+    ### TRAIN THE AI ###
+    index = 0
+    epoch = 0
+
+    plt.ion()
+
+    fig, ax = plt.subplots()
+
+    epochs = []
+    test_accuracies = []
+    train_accuracies = []
+
+    line_test, = ax.plot([], [], label="Test")
+    line_train, = ax.plot([], [], label="Train")
+
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("Accuracy")
+    ax.set_title("Training Progress")
+    ax.legend()
+
+    def show_accuracy():
+        test_accuracy = AI.accuracy(x_test[:1000], utils.y_test[:1000]) * 100
+        train_accuracy = AI.accuracy(x_train, utils.y_train) * 100
+
+        print(f"\nTest Accuracy: {test_accuracy : .4f}%")
+        print(f"Training Accuracy: {train_accuracy : .4f}%")
+        print(f"Epoch: {epoch:.4f}")
+
+        # Add data
+        epochs.append(epoch)
+        test_accuracies.append(test_accuracy)
+        train_accuracies.append(train_accuracy)
+
+        # Update graph
+        line_test.set_data(epochs, test_accuracies)
+        line_train.set_data(epochs, train_accuracies)
+
+        ax.set_xlim(0, EPOCHS)
+        ax.set_ylim(0, 100)
+
+        fig.canvas.draw()
+        fig.canvas.flush_events()
 
 
-### TRAIN THE AI ###
-index = 0
-epoch = 0
+    start = 0
 
-plt.ion()
+    while epoch < EPOCHS-0.1:
 
-fig, ax = plt.subplots()
+        indices = np.random.permutation(len(x_train_aug))
 
-epochs = []
-test_accuracies = []
-train_accuracies = []
+        for start_index in range(0, len(x_train_aug), BATCH_SIZE):
 
-line_test, = ax.plot([], [], label="Test")
-line_train, = ax.plot([], [], label="Train")
+            if len(plt.get_figlabels()) == 0:
+                return
 
-ax.set_xlabel("Epoch")
-ax.set_ylabel("Accuracy")
-ax.set_title("Training Progress")
-ax.legend()
+            if time.perf_counter() - start > 2:
+                show_accuracy()
+                start = time.perf_counter()
 
-def show_accuracy():
-    test_accuracy = AI.accuracy(x_test[:1000], utils.y_test[:1000]) * 100
-    train_accuracy = AI.accuracy(x_train, utils.y_train) * 100
+            batch_indices = indices[start_index:start_index + BATCH_SIZE]
 
-    print(f"\nTest Accuracy: {test_accuracy : .4f}%")
-    print(f"Training Accuracy: {train_accuracy : .4f}%")
-    print(f"Epoch: {epoch:.4f}")
+            batch_x = x_train_aug[batch_indices]
+            batch_y = y_train_aug[batch_indices]
 
-    # Add data
-    epochs.append(epoch)
-    test_accuracies.append(test_accuracy)
-    train_accuracies.append(train_accuracy)
+            AI.learn(batch_x, batch_y, LEARN_RATE, MOMENTUM)
 
-    # Update graph
-    line_test.set_data(epochs, test_accuracies)
-    line_train.set_data(epochs, train_accuracies)
+            epoch += len(batch_x) / len(x_train_aug)
 
-    ax.set_xlim(0, EPOCHS)
-    ax.set_ylim(0, 100)
+    show_accuracy()
 
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-
-
-start = 0
-
-while epoch < EPOCHS-0.1:
-
-    indices = np.random.permutation(len(x_train_aug))
-
-    for start_index in range(0, len(x_train_aug), BATCH_SIZE):
-
-        if time.perf_counter() - start > 2:
-            show_accuracy()
-            start = time.perf_counter()
-
-        batch_indices = indices[start_index:start_index + BATCH_SIZE]
-
-        batch_x = x_train_aug[batch_indices]
-        batch_y = y_train_aug[batch_indices]
-
-        AI.learn(batch_x, batch_y, LEARN_RATE, MOMENTUM)
-
-        epoch += len(batch_x) / len(x_train_aug)
-
-show_accuracy()
-
-plt.close()
+    plt.close()

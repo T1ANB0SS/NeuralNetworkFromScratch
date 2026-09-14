@@ -1,5 +1,5 @@
 ## BACKGROUND:
-  Yeah uhm, I made this only using basic libraries like numpy, cv2, mathplotlib, and pygame.
+  Yeah uhm, I made this only using basic libraries like numpy, cv2, matplotlib, and pygame.
   It isn't too amazing, but it's able to recognize most handritten digits trained from the MNIST dataset 
   I didn't copy code, but I did watch several tutorials and asked AI a lot, lol, asking AI to teach me how to make AI.
   I now understand a lot more about gradient descent, backpropagation, vectorization, etc.
@@ -15,7 +15,7 @@
   - comparison.py - comparing manual approximation of gradient descent to using backpropagation
   - neural_network.py - the neural network script and class
   - utils.py - utilities that reads the MNIST dataset and other stuff to help run the neural network
-  - trainer.py - trains the AI and shows its progress using mathplotlib
+  - trainer.py - trains the AI and shows its progress using matplotlib
   - MNIST_ORG - the MNIST dataset
 
 ## FEATURES:

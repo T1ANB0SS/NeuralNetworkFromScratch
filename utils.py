@@ -11,12 +11,16 @@ training_labels_filepath = join(input_path, 'train-labels.idx1-ubyte')
 test_images_filepath = join(input_path, 't10k-images.idx3-ubyte')
 test_labels_filepath = join(input_path, 't10k-labels.idx1-ubyte')
 
+custom_data_path = 'custom_data'
+
 NOISE_STRENGTH = 0.3
 NOISE_PROBABILITY = 0.2
 SHIFT_STRENGTH = 5
 SCALE_DOWN_STRENGTH = 0.4
-SCALE_UP_STRENGTH = 0.1
+SCALE_UP_STRENGTH = 0.2
 ROTATION_STRENGTH = 10
+
+MNIST_AUGMENT_AMOUNT = 2
 
 IMG_WIDTH = 28
 IMG_HEIGHT = 28
@@ -107,41 +111,70 @@ def show_images(images, title_texts):
     plt.subplots_adjust(hspace=0.5)
     plt.show()
 
-#
-# Load MNIST dataset
-#
-mnist_dataloader = MnistDataloader(training_images_filepath, training_labels_filepath, test_images_filepath, test_labels_filepath)
-(x_train, y_train), (x_test, y_test) = mnist_dataloader.load_data()
 
-x_train_aug = np.concatenate([x_train, x_train]) # 2x data
+(x_train, y_train) = None, None
+(x_test, y_test) = None, None
+(x_train_aug, y_train_aug) = None, None
 
-for i, x in enumerate(x_train_aug):
-    x_train_aug[i] = augment_image(x)
+def init():
+    global x_train, y_train, x_test, y_test, x_train_aug, y_train_aug
 
-y_train_aug = np.concatenate([y_train, y_train])
+    ### Load MNIST dataset ###
+
+    mnist_dataloader = MnistDataloader(training_images_filepath, training_labels_filepath, test_images_filepath, test_labels_filepath)
+    (x_train, y_train), (x_test, y_test) = mnist_dataloader.load_data()
+
+    ### Load custom_data
+
+    """custom_images = []
+    
+    for filename in os.listdir("custom_data/9"):
+        grid = np.load("custom_data/9/" + filename)
+        custom_images.append(grid)
+    
+    custom_images = np.array(custom_images, dtype = np.float32)
+    """
+
+    ### AUGMENT IMAGES ###
+
+    x_train_aug = np.concatenate([x_train]*MNIST_AUGMENT_AMOUNT) # 2x data
+
+    percent = 0
+    for i, x in enumerate(x_train_aug):
+        x_train_aug[i] = augment_image(x)
+        new_percent = round(100*(i+1)/len(x_train_aug))
+        if new_percent != percent:
+            percent = new_percent
+            print(f"Augmenting Images...{percent}%")
+
+    y_train_aug = np.concatenate([y_train, y_train])
+
+
 
 def get_random_train():
     r = random.randrange(len(x_train))
     return x_train[r]
 
-def show_examples():
+def show_examples(randomize = False, augment = False, search = None, amount = 15):
     images_2_show = []
     titles_2_show = []
-    """
-    ### RANDOM TRAINING IMAGES ###
+    r = 0
 
-    for i in range(15):
-        r = random.randrange(len(x_train_aug))
-        images_2_show.append(x_train_aug[r])
-        titles_2_show.append(
-            'training image [' + str(r) + '] = ' + str(y_train_aug[r])
-        )
-    """
-    ### RANDDOM AUGMENTATIONS ###
+    for i in range(amount):
 
-    for i in range(15):
-        r = 0
-        images_2_show.append(augment_image(x_train[r]))
+        ### RANDOM TRAINING IMAGES ###
+        if randomize:
+            r = random.randrange(len(x_train))
+
+        ### SEARCH NUMBER ###
+        while search is not None:
+            r = (r+1) % len(x_train)
+            if y_train[r] == search: break
+
+        ### RANDDOM AUGMENTATIONS ###
+        image = x_train[r] if not augment else augment_image(x_train[r])
+
+        images_2_show.append(image)
         titles_2_show.append(
             'training image [' + str(r) + '] = ' + str(y_train[r])
         )

@@ -51,6 +51,7 @@ class Layer:
         return self.activations
 
     def randomize(self):
+        # FOR RELU
         self.weights = np.random.randn(self.size, self.input_size) * np.sqrt(2 / self.input_size)
         self.biases = np.zeros(self.size)
 
