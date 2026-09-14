@@ -63,7 +63,7 @@ def draw_at_mouse(mouse_x, mouse_y, erase = False):
             strength = 1 - distance / radius
             strength /= 0.5
 
-            if erasing:
+            if erase:
                 grid[y, x] = max(min(grid[y, x], 1-strength), 0)
             else:
                 grid[y, x] = min(max(grid[y, x], strength), 1)
@@ -144,12 +144,12 @@ def draw_panel():
     screen.blit(panel, (GRID_WIDTH, 0))
 
 
-drawing = False
-erasing = False
-
-running = True
-
 if __name__ == "__main__":
+
+    drawing = False
+    erasing = False
+
+    running = True
 
     while running:
 

@@ -16,7 +16,7 @@ RANDOMIZE_EXAMPLES = True
 AUGMENT_EXAMPLES = True
 SEARCH_EXAMPLES = 9
 
-AI = nn.NeuralNetwork((utils.INPUT_SIZE, 128, 32, 10))
+AI = nn.NeuralNetwork((utils.INPUT_SIZE, 128, 64, 10))
 AI.randomize()
 
 def init():

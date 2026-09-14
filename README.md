@@ -1,9 +1,8 @@
 ## BACKGROUND:
   Yeah uhm, I made this only using basic libraries like numpy, cv2, matplotlib, and pygame.
-  It isn't too amazing, but it's able to recognize most handritten digits trained from the MNIST dataset 
-  I didn't copy code, but I did watch several tutorials and asked AI a lot, lol, asking AI to teach me how to make AI.
+  It isn't too amazing, but it's able to recognize most handritten digits trained from the MNIST dataset
   I now understand a lot more about gradient descent, backpropagation, vectorization, etc.
-  I also learnt many functions available in numpy and mathplotlib.
+  I also learnt many functions available in numpy and matplotlib.
 
 ## NOTES:
   - It does some pre-processing to do some augmentation so it takes some time to load.
