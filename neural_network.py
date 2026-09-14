@@ -8,20 +8,29 @@ def sigmoid_derivative(x):
     s = sigmoid(x)
     return s * (1 - s)
 
+def softmax(x):
+    x = x - np.max(x, axis=-1, keepdims=True)
+    exp_x = np.exp(x)
+    return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
+
 functions = {
     "ReLU": lambda x: np.maximum(0, x),
     "Sigmoid": sigmoid,
     "Tanh": lambda x: np.tanh(x),
+    "Softmax": softmax,
 }
 
 derivatives = {
     "ReLU": lambda x: np.where(x > 0, 1.0, 0.0),
     "Sigmoid": sigmoid_derivative,
     "Tanh": lambda x: 1 - np.tanh(x) ** 2,
+    "Softmax": None, # hard-coded derivative
+
 }
 
 class Layer:
     def __init__(self, size, input_size, activation_name):
+        self.activation_name = activation_name
         self.activation_func = functions[activation_name]
         self.activation_deriv_func = derivatives[activation_name]
 
@@ -51,8 +60,14 @@ class Layer:
         return self.activations
 
     def randomize(self):
-        # FOR RELU
-        self.weights = np.random.randn(self.size, self.input_size) * np.sqrt(2 / self.input_size)
+        if self.activation_name == "ReLU":
+            # He initialization #
+            scale = np.sqrt(2 / self.input_size)
+        else:
+            # Xavier/Glorot initialization #
+            scale = np.sqrt(1 / self.input_size)
+
+        self.weights = np.random.randn(self.size, self.input_size) * scale
         self.biases = np.zeros(self.size)
 
     def apply_gradients(self, learn_rate, momentum):
@@ -75,6 +90,11 @@ class Layer:
         # z --> a --> c (a=activation/output; z=weighted_sum; c=cost)
         # ∂c/∂z = ∂a/∂z * ∂c/∂a (this is the output)
         # ∂c/∂z = A'(z) * C'(a)
+
+        if self.activation_name == "Softmax":
+            # simple derivative as a result of using cross entropy (a-y)
+            return self.activations - expected
+
         activation_derivatives = self.activation_deriv_func(self.weighted_sums)
         cost_derivatives = self.node_cost_derivative(self.activations, expected)
         node_derivatives = activation_derivatives * cost_derivatives
@@ -106,7 +126,7 @@ class Layer:
         self.bias_gradients += np.sum(node_derivatives, axis=0)
 
 class NeuralNetwork:
-    def __init__(self, layer_sizes, activation="ReLU", output_activation="Sigmoid"):
+    def __init__(self, layer_sizes, activation="ReLU", output_activation="Softmax"):
         self.layers = []
         layer_amount = len(layer_sizes)
         for i in range(1, layer_amount):
@@ -120,18 +140,44 @@ class NeuralNetwork:
 
     def accuracy(self, inputs, expected):
         predicted = np.argmax(self.calculate_outputs(inputs), axis=1)
+
         if expected.ndim == 2:
             expected = np.argmax(expected, axis=1)
-        return np.average(predicted == expected)
+
+        return np.mean(predicted == expected)
+
+    def class_accuracy(self, inputs, expected):
+        predicted = np.argmax(self.calculate_outputs(inputs), axis=1)
+
+        if expected.ndim == 2:
+            expected = np.argmax(expected, axis=1)
+
+        num_classes = self.layers[-1].size
+
+        return np.array([
+            np.mean(predicted[expected == i] == i)
+            if np.any(expected == i)
+            else np.nan
+            for i in range(num_classes)
+        ])
 
     def randomize(self):
         for layer in self.layers:
             layer.randomize()
 
     def cost(self, inputs, expected) -> float:
-        outputs = self.calculate_outputs(inputs)
-        node_costs = np.sum(np.power(expected - outputs, 2), axis=1)
-        return np.average(node_costs)
+
+        if self.layers[-1].activation_name == "Softmax": # CROSS ENTROPY
+            # Gives a nice gradient derivative for softmax (a - y)
+            outputs = self.calculate_outputs(inputs)
+            outputs = np.clip(outputs, 1e-15, 1 - 1e-15)
+            node_costs = -np.sum(expected * np.log(outputs), axis=1)
+
+        else: # MSE
+            outputs = self.calculate_outputs(inputs)
+            node_costs = np.sum(np.power(expected - outputs, 2), axis=1)
+
+        return np.mean(node_costs)
 
     def apply_gradients(self, learn_rate, momentum):
         for layer in self.layers:

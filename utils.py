@@ -14,10 +14,10 @@ test_labels_filepath = join(input_path, 't10k-labels.idx1-ubyte')
 custom_data_path = 'custom_data'
 
 NOISE_STRENGTH = 0.3
-NOISE_PROBABILITY = 0.2
+NOISE_PROBABILITY = 0.3
 SHIFT_STRENGTH = 5
 SCALE_DOWN_STRENGTH = 0.4
-SCALE_UP_STRENGTH = 0.2
+SCALE_UP_STRENGTH = 0.1
 ROTATION_STRENGTH = 10
 
 MNIST_AUGMENT_AMOUNT = 2

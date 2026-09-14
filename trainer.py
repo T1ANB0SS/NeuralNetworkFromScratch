@@ -6,10 +6,15 @@ import neural_network as nn
 import utils
 
 # AI CONFIGURATION
-LEARN_RATE = 0.05
-BATCH_SIZE = 200
+LEARN_RATE = 0.03
+BATCH_SIZE = 100
 MOMENTUM = 0.9
 EPOCHS = 20
+
+MAX_CHECK_SAMPLE = 1000 # for checking accuracy
+RANDOMIZE_EXAMPLES = True
+AUGMENT_EXAMPLES = True
+SEARCH_EXAMPLES = 9
 
 AI = nn.NeuralNetwork((utils.INPUT_SIZE, 128, 32, 10))
 AI.randomize()
@@ -26,7 +31,7 @@ def init():
     y_train_aug = np.eye(10, dtype=np.float32)[utils.y_train_aug]
 
     ### SHOW EXAMPLES ###
-    utils.show_examples(True, False, 9)
+    utils.show_examples(RANDOMIZE_EXAMPLES, AUGMENT_EXAMPLES, SEARCH_EXAMPLES)
 
     ### TRAIN THE AI ###
     index = 0
@@ -49,12 +54,13 @@ def init():
     ax.legend()
 
     def show_accuracy():
-        test_accuracy = AI.accuracy(x_test[:1000], utils.y_test[:1000]) * 100
-        train_accuracy = AI.accuracy(x_train, utils.y_train) * 100
 
-        print(f"\nTest Accuracy: {test_accuracy : .4f}%")
-        print(f"Training Accuracy: {train_accuracy : .4f}%")
-        print(f"Epoch: {epoch:.4f}")
+        test_accuracy = AI.accuracy(x_test[:MAX_CHECK_SAMPLE], utils.y_test[:MAX_CHECK_SAMPLE]) * 100
+        train_accuracy = AI.accuracy(x_train[:MAX_CHECK_SAMPLE], utils.y_train[:MAX_CHECK_SAMPLE]) * 100
+
+        print(f"\nTest Accuracy: {test_accuracy : .2f}%")
+        print(f"Training Accuracy: {train_accuracy : .2f}%")
+        print(f"Epoch: {epoch:.2f}")
 
         # Add data
         epochs.append(epoch)
@@ -97,5 +103,11 @@ def init():
             epoch += len(batch_x) / len(x_train_aug)
 
     show_accuracy()
+
+    print("\nClass Accuracy:")
+    test = AI.class_accuracy(x_test, utils.y_test)
+    train = AI.class_accuracy(x_train, utils.y_train)
+    for i, acc in enumerate(zip(test, train)):
+        print(f"{i}). test: {acc[0]*100:.2f}  |  train: {acc[1]*100:.2f}%  |  diff: {(acc[0]-acc[1])*100:.2f}%")
 
     plt.close()
